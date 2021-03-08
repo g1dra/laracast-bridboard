@@ -22,6 +22,11 @@ use Illuminate\Database\Eloquent\Model;
  * @method static Builder|Project whereId($value)
  * @method static Builder|Project whereTitle($value)
  * @method static Builder|Project whereUpdatedAt($value)
+ * @property int $user_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Task[] $tasks
+ * @property-read int|null $tasks_count
+ * @property-read \App\Models\User $user
+ * @method static Builder|Project whereUserId($value)
  */
 class Project extends Model
 {
