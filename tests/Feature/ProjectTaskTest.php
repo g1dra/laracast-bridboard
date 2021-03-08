@@ -22,6 +22,7 @@ class ProjectTaskTest extends TestCase
         $this->post($project->path() . '/tasks', ['body' => 'Test task']);
 
         // todo not working
+        $this->get($project->path())->assertStatus(200);
         $this->get($project->path())
             ->assertSee('Test task');
 
