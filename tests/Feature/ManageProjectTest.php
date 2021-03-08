@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class ProjectTest extends TestCase
+class ManageProjectTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
 
@@ -22,16 +22,28 @@ class ProjectTest extends TestCase
 
         $this->assertDatabaseHas('projects', $attributes);
         $this->get('/projects')->assertSee($attributes['title']);
+
+        $this->get('/projects/create')->assertRedirect('login');
+        $this->get('/projects/create')->assertStatus(200);
     }
 
     /** @test */
     public function a_user_can_view_project_page()
     {
-        $this->withoutExceptionHandling();
-        $project = Project::factory()->create();
+        $user = User::factory()->create();
+        $this->be($user);
+        $project = Project::factory()->create(['user_id' => $user->id]);
         $this->get($project->path())
             ->assertSee($project->title)
             ->assertSee($project->description);
+    }
+
+    /** @test */
+    public function a_auth_user_cant_view_project_of_others()
+    {
+        $this->be(User::factory()->create());
+        $project = Project::factory()->create();
+        $this->get($project->path())->assertStatus(403);
     }
 
     /** @test */
