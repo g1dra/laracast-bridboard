@@ -33,8 +33,15 @@ class Task extends Model
 
     protected $guarded = [];
 
+    protected $touches = ['project'];
+
     public function project()
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Project::class)->latest('updated_at');
+    }
+
+    public function path()
+    {
+        return "/projects/{$this->project->id}/tasks/{$this->id}";
     }
 }

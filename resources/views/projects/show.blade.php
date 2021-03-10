@@ -15,7 +15,7 @@
 
                 @foreach($project->tasks as $task)
                     <div class="card mb-3">
-                       <form method="post" action="{{ $project->path() . '/tasks/' . $task->id }}">
+                       <form method="post" action="{{ $task->path() }}">
                            @method('PATCH')
                            @csrf
                            <div class="flex items-center">
@@ -38,7 +38,9 @@
 
             <h2 class="text-gray text-lg font-normal mb-3">General notes</h2>
 
-            <textarea class="card w-full" style="min-height: 200px">Lorem ipsum.</textarea>
+            <form action="{{ $project->path() }}">
+                <textarea class="card w-full" style="min-height: 200px" placeholder="Make a note">{{ $project->notes }}</textarea>
+            </form>
         </div>
         <div class="lg:w-1/4 px-3">
             @include('projects.card')

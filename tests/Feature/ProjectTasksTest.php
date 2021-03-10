@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class ProjectTaskTest extends TestCase
+class ProjectTasksTest extends TestCase
 {
     use RefreshDatabase;
     /** @test */
@@ -50,18 +50,21 @@ class ProjectTaskTest extends TestCase
     /** @test */
     public function a_task_can_be_updated()
     {
+        $this->withoutExceptionHandling();
+
         $this->signIn();
 
-        $project = Project::factory()->create(['user_id' => auth()->id()]);
+        $project = auth()->user()->projects()->create(
+            Project::factory()->raw()
+        );
 
         $task = $project->addTask('test task');
-
-        $this->patch($project->path() . '/tasks/' . $task->id, [
+        $this->patch($task->path(), [
             'body' => 'changed',
             'completed' => true
         ]);
 
-        $this->assertDatabaseHas('tasks',[
+        $this->assertDatabaseHas('tasks', [
             'body' => 'changed',
             'completed' => true
         ]);
