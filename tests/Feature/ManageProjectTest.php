@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Project;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -25,13 +24,10 @@ class ManageProjectTest extends TestCase
         ];
 
         $response = $this->post('/projects', $attributes);
-        // zasto se ne provjeri response
         $project = Project::where($attributes)->first();
         $response->assertRedirect($project->path());
 
         $this->assertDatabaseHas('projects', $attributes);
-
-        // $this->get('/projects')->assertSee($attributes['title']);
 
         $this->get($project->path())
             ->assertSee($attributes['title'])
@@ -58,6 +54,14 @@ class ManageProjectTest extends TestCase
     }
 
     /** @test */
+    public function a_auth_user_cant_update_project_of_Others()
+    {
+        $this->signIn();
+        $project = Project::factory()->create();
+        $this->patch($project->path(), [])->assertStatus(403);
+    }
+
+    /** @test */
     public function a_project_requires_a_title()
     {
        $this->signIn();
@@ -78,5 +82,19 @@ class ManageProjectTest extends TestCase
     {
         $attributes = Project::factory()->raw();
         $this->post('/projects', $attributes)->assertRedirect('login');
+    }
+
+    /** @test */
+    public function a_user_can_update_a_project()
+    {
+        $this->signIn();
+        $this->withoutExceptionHandling();
+        $project = Project::factory()->create(['user_id'=> auth()->id()]);
+
+        $this->patch($project->path(), [
+            'notes' => 'Changed'
+        ])->assertRedirect($project->path());
+
+        $this->assertDatabaseHas('projects', ['notes' => 'Changed']);
     }
 }

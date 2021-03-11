@@ -33,11 +33,17 @@ class ProjectsController extends Controller
 
     public function show(Project $project)
     {
-        if(auth()->user()->isNot($project->user))
-        {
-            return abort(403);
-        }
+       $this->authorize('update', $project);
 
         return view('projects.show', compact('project'));
+    }
+
+    public function update(Project $project)
+    {
+        $this->authorize('update', $project);
+
+        $project->update(request(['notes']));
+
+        return redirect($project->path());
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Tests\Setup\ProjectFactory;
 use Tests\TestCase;
 
 class ProjectTasksTest extends TestCase
@@ -52,11 +53,10 @@ class ProjectTasksTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
-        $this->signIn();
-
-        $project = auth()->user()->projects()->create(
-            Project::factory()->raw()
-        );
+        $project = app(ProjectFactory::class)
+            ->ownedBy($this->signIn())
+            ->withTasks(1)
+            ->create();
 
         $task = $project->addTask('test task');
         $this->patch($task->path(), [
@@ -74,11 +74,13 @@ class ProjectTasksTest extends TestCase
     function only_the_owner_of_a_project_may_update_tasks()
     {
         $this->signIn();
-        $project = Project::factory()->create(); // project is generated with new user
+        /*$project = Project::factory()->create(); // project is generated with new user
 
-        $task = $project->addTask('test task');
+        $task = $project->addTask('test task');*/
 
-        $this->patch($project->path() . '/tasks/' . $task->id, ['body' => 'changed'])
+        $project = app(ProjectFactory::class)->withTasks(1)->create();
+
+        $this->patch($project->path() . '/tasks/' . $project->tasks[0], ['body' => 'changed'])
             ->assertStatus(403);
 
         $this->assertDatabaseMissing('tasks', ['body' => 'changed']);
